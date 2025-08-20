@@ -416,6 +416,9 @@ def submit_answer():
             'feedback': feedback_text
         })
         
+        # Save session data to persist the answers
+        save_session_data()
+        
         return jsonify({
             'score': score10,
             'feedback': feedback_text,
