@@ -35,17 +35,36 @@ def load_models():
     try:
         # First try local directory (for Railway deployment)
         model_path = os.path.join(os.path.dirname(__file__), 'model')
+        print(f"Trying local model path: {model_path}")
+        print(f"Local path exists: {os.path.exists(model_path)}")
+        
         if not os.path.exists(model_path):
             # Fallback to parent directory (for local development)
             model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ai_interviewer_project', 'model')
+            print(f"Trying fallback model path: {model_path}")
+            print(f"Fallback path exists: {os.path.exists(model_path)}")
         
-        with open(os.path.join(model_path, 'tfidf_vectorizer.pkl'), 'rb') as f:
+        # List files in model directory
+        if os.path.exists(model_path):
+            print(f"Files in model directory: {os.listdir(model_path)}")
+        
+        vectorizer_path = os.path.join(model_path, 'tfidf_vectorizer.pkl')
+        model_path_file = os.path.join(model_path, 'resume_classifier.pkl')
+        
+        print(f"Vectorizer file exists: {os.path.exists(vectorizer_path)}")
+        print(f"Model file exists: {os.path.exists(model_path_file)}")
+        
+        with open(vectorizer_path, 'rb') as f:
             vectorizer = pickle.load(f)
-        with open(os.path.join(model_path, 'resume_classifier.pkl'), 'rb') as f:
+        with open(model_path_file, 'rb') as f:
             model = pickle.load(f)
+        
+        print("Models loaded successfully!")
         return vectorizer, model
     except Exception as e:
         print(f"Error loading models: {e}")
+        import traceback
+        traceback.print_exc()
         return None, None
 
 def get_roles():
@@ -245,11 +264,13 @@ def upload_resume():
         # Load models and predict role using the actual working AI models
         vectorizer, model = load_models()
         if vectorizer is None or model is None:
-            return jsonify({'error': 'AI models not available'}), 500
-        
-        # Predict role using the actual trained model
-        X = vectorizer.transform([resume_text])
-        predicted_role = model.predict(X)[0]
+            # Fallback: use basic role prediction without ML models
+            print("ML models not available, using fallback prediction")
+            predicted_role = selected_role  # Use selected role as fallback
+        else:
+            # Predict role using the actual trained model
+            X = vectorizer.transform([resume_text])
+            predicted_role = model.predict(X)[0]
         
         # Calculate ATS score using the actual working logic
         ats_score_value = ats_score(resume_text, selected_role)
