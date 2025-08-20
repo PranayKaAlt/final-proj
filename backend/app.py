@@ -418,6 +418,7 @@ def get_roles_endpoint():
     return jsonify({'roles': roles})
 
 if __name__ == '__main__':
-    print("Starting AI Recruitment System API...")
-    print("API will be available at: http://localhost:5000")
-    app.run(debug=True, host='0.0.0.0', port=5000) 
+    port = int(os.environ.get('PORT', 5000))
+    print(f"Starting AI Recruitment System API...")
+    print(f"API will be available at: http://localhost:{port}")
+    app.run(debug=False, host='0.0.0.0', port=port) 

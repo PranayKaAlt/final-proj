@@ -156,29 +156,37 @@ python3 train_resume_model.py
 
 ## 🚀 Deployment
 
-### Frontend (Production Build)
+### **Simple Deployment (Recommended)**
+
+Your project is configured for easy deployment using:
+- **Frontend**: Vercel (React)
+- **Backend**: Railway (Python Flask)
+
+See `VERCEL_RAILWAY_DEPLOYMENT.md` for detailed instructions.
+
+### **Quick Deploy Steps:**
+1. **Backend**: Deploy to Railway from `backend/` directory
+2. **Frontend**: Deploy to Vercel from project root
+3. **Configure**: Set environment variables in both platforms
+
+### **Local Development**
 ```bash
-npm run build
-# Deploy the `build` folder to your hosting service
+# Start backend
+cd backend
+python3 app.py
+
+# Start frontend (in another terminal)
+npm start
 ```
 
-### Backend (Production)
+### **Production Build**
 ```bash
-# Use Gunicorn for production
+# Frontend build
+npm run build
+
+# Backend with Gunicorn
 pip install gunicorn
 gunicorn -w 4 -b 0.0.0.0:5000 app:app
-```
-
-### Docker Deployment
-```dockerfile
-# Backend Dockerfile
-FROM python:3.9-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-EXPOSE 5000
-CMD ["python", "app.py"]
 ```
 
 ## 🔍 Troubleshooting

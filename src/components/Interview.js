@@ -34,9 +34,11 @@ const Interview = () => {
   }, [candidateInfo]);
 
   const loadInterviewQuestions = async () => {
+    const apiUrl = process.env.REACT_APP_API_URL || '';
+    
     try {
       setLoading(true);
-      const response = await axios.post('/api/interview-questions', {
+      const response = await axios.post(`${apiUrl}/api/interview-questions`, {
         candidate_name: candidateInfo.candidate_name,
         selected_role: candidateInfo.selected_role
       });
@@ -64,8 +66,10 @@ const Interview = () => {
     try {
       setError('');
       
+      const apiUrl = process.env.REACT_APP_API_URL || '';
+      
       // Submit answer to AI backend for analysis
-      const response = await axios.post('/api/submit-answer', {
+      const response = await axios.post(`${apiUrl}/api/submit-answer`, {
         candidate_name: candidateInfo.candidate_name,
         selected_role: candidateInfo.selected_role,
         question: questions[currentQuestion],
@@ -100,8 +104,10 @@ const Interview = () => {
   };
 
   const getFinalResults = async () => {
+    const apiUrl = process.env.REACT_APP_API_URL || '';
+    
     try {
-      const response = await axios.post('/api/interview-results', {
+      const response = await axios.post(`${apiUrl}/api/interview-results`, {
         candidate_name: candidateInfo.candidate_name,
         selected_role: candidateInfo.selected_role
       });

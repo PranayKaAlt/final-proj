@@ -58,8 +58,10 @@ const ResumeUpload = () => {
     formData.append('candidate_name', candidateName);
     formData.append('selected_role', selectedRole);
 
+    const apiUrl = process.env.REACT_APP_API_URL || '';
+    
     try {
-      const response = await axios.post('/api/upload-resume', formData, {
+      const response = await axios.post(`${apiUrl}/api/upload-resume`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
