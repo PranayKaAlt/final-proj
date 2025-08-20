@@ -1,0 +1,12 @@
+{
+  "generated_at": "2025-08-20T12:20:09.762151",
+  "system_overview": {
+    "total_models": 0,
+    "performance_entries": 0,
+    "last_retraining": "No retraining recorded"
+  },
+  "model_performance": {},
+  "recommendations": [
+    "Collect more performance data for better insights"
+  ]
+}
