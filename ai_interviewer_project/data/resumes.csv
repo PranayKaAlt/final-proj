@@ -1,0 +1,11 @@
+Role,ResumeText,Selected,Skills
+Frontend Developer,"Experienced in React, JavaScript, HTML, CSS. Built responsive web apps.",1,"React, JavaScript, HTML, CSS"
+Backend Developer,"Skilled in Python, Django, REST APIs, and database design.",1,"Python, Django, REST, SQL"
+DevOps Engineer,"Managed CI/CD pipelines, Docker, Kubernetes, AWS deployments.",1,"CI/CD, Docker, Kubernetes, AWS"
+ML Engineer,"Developed ML models using scikit-learn, TensorFlow, and data pipelines.",1,"scikit-learn, TensorFlow, Data Pipelines"
+Data Analyst,"Analyzed datasets with Python, pandas, and created dashboards in Tableau.",1,"Python, pandas, Tableau"
+Frontend Developer,"Basic knowledge of HTML and CSS. No JavaScript experience.",0,"HTML, CSS"
+Backend Developer,"Worked with PHP and MySQL. Limited experience with Python.",0,"PHP, MySQL"
+DevOps Engineer,"Familiar with Linux but no experience with cloud or containers.",0,"Linux"
+ML Engineer,"Understands statistics but no hands-on ML project experience.",0,"Statistics"
+Data Analyst,"Excel user, no experience with Python or visualization tools.",0,"Excel"

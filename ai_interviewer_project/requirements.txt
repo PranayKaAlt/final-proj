@@ -1,0 +1,12 @@
+pandas
+scikit-learn
+textblob
+PyPDF2
+pyttsx3
+SpeechRecognition
+streamlit
+reportlab
+numpy
+joblib
+matplotlib
+fpdf
