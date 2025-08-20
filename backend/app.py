@@ -30,6 +30,28 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Global variables to store session data (in production, use a proper database)
 session_data = {}
 
+# Simple file-based session storage for Railway deployment
+import json
+import tempfile
+
+def save_session_data():
+    """Save session data to a temporary file"""
+    try:
+        with open('/tmp/session_data.json', 'w') as f:
+            json.dump(session_data, f)
+    except Exception as e:
+        print(f"Error saving session data: {e}")
+
+def load_session_data():
+    """Load session data from temporary file"""
+    global session_data
+    try:
+        with open('/tmp/session_data.json', 'r') as f:
+            session_data = json.load(f)
+    except Exception as e:
+        print(f"Error loading session data: {e}")
+        session_data = {}
+
 def load_models():
     """Load the trained AI models"""
     try:
@@ -270,6 +292,9 @@ def upload_resume():
             'skills': skills
         }
         
+        # Save session data to file
+        save_session_data()
+        
         return jsonify({
             'candidate_name': candidate_name,
             'selected_role': selected_role,
@@ -287,6 +312,9 @@ def upload_resume():
 def get_interview_questions():
     """Get AI-generated interview questions using the actual working logic"""
     try:
+        # Load session data from file
+        load_session_data()
+        
         data = request.get_json()
         candidate_name = data.get('candidate_name')
         selected_role = data.get('selected_role')
@@ -316,6 +344,9 @@ def get_interview_questions():
 def submit_answer():
     """Submit and analyze interview answer using the actual working logic"""
     try:
+        # Load session data from file
+        load_session_data()
+        
         data = request.get_json()
         candidate_name = data.get('candidate_name')
         selected_role = data.get('selected_role')
@@ -379,6 +410,9 @@ def submit_answer():
 def get_interview_results():
     """Get complete interview results using the actual working logic"""
     try:
+        # Load session data from file
+        load_session_data()
+        
         data = request.get_json()
         candidate_name = data.get('candidate_name')
         selected_role = data.get('selected_role')
