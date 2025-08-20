@@ -30,15 +30,25 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Global variables to store session data (in production, use a proper database)
 session_data = {}
 
-# Simple file-based session storage for Railway deployment
+# Enhanced session management for Railway deployment
 import json
-import tempfile
+import hashlib
+import time
+
+def create_session_key(candidate_name, selected_role):
+    """Create a unique session key"""
+    key_string = f"{candidate_name}_{selected_role}_{int(time.time())}"
+    return hashlib.md5(key_string.encode()).hexdigest()[:8]
 
 def save_session_data():
-    """Save session data to a temporary file"""
+    """Save session data to a temporary file with timestamp"""
     try:
+        session_data_with_timestamp = {
+            'data': session_data,
+            'timestamp': time.time()
+        }
         with open('/tmp/session_data.json', 'w') as f:
-            json.dump(session_data, f)
+            json.dump(session_data_with_timestamp, f)
     except Exception as e:
         print(f"Error saving session data: {e}")
 
@@ -47,7 +57,12 @@ def load_session_data():
     global session_data
     try:
         with open('/tmp/session_data.json', 'r') as f:
-            session_data = json.load(f)
+            session_data_with_timestamp = json.load(f)
+            # Check if session is not too old (1 hour)
+            if time.time() - session_data_with_timestamp.get('timestamp', 0) < 3600:
+                session_data = session_data_with_timestamp.get('data', {})
+            else:
+                session_data = {}
     except Exception as e:
         print(f"Error loading session data: {e}")
         session_data = {}
@@ -301,7 +316,8 @@ def upload_resume():
             'predicted_role': predicted_role,
             'ats_score': ats_score_value,
             'skills': skills,
-            'message': 'Resume analyzed successfully using AI models'
+            'message': 'Resume analyzed successfully using AI models',
+            'session_key': session_key
         })
         
     except Exception as e:
@@ -318,11 +334,15 @@ def get_interview_questions():
         data = request.get_json()
         candidate_name = data.get('candidate_name')
         selected_role = data.get('selected_role')
+        session_key = data.get('session_key')
         
         if not candidate_name or not selected_role:
             return jsonify({'error': 'Candidate name and role are required'}), 400
         
-        session_key = f"{candidate_name}_{selected_role}"
+        # Use provided session_key or create one
+        if not session_key:
+            session_key = f"{candidate_name}_{selected_role}"
+        
         if session_key not in session_data:
             return jsonify({'error': 'Resume not found. Please upload resume first.'}), 400
         
@@ -350,6 +370,7 @@ def submit_answer():
         data = request.get_json()
         candidate_name = data.get('candidate_name')
         selected_role = data.get('selected_role')
+        session_key = data.get('session_key')
         question = data.get('question')
         answer = data.get('answer')
         question_index = data.get('question_index')
@@ -357,7 +378,10 @@ def submit_answer():
         if not all([candidate_name, selected_role, question, answer, question_index is not None]):
             return jsonify({'error': 'All fields are required'}), 400
         
-        session_key = f"{candidate_name}_{selected_role}"
+        # Use provided session_key or create one
+        if not session_key:
+            session_key = f"{candidate_name}_{selected_role}"
+        
         if session_key not in session_data:
             return jsonify({'error': 'Resume not found. Please upload resume first.'}), 400
         
@@ -416,11 +440,15 @@ def get_interview_results():
         data = request.get_json()
         candidate_name = data.get('candidate_name')
         selected_role = data.get('selected_role')
+        session_key = data.get('session_key')
         
         if not candidate_name or not selected_role:
             return jsonify({'error': 'Candidate name and role are required'}), 400
         
-        session_key = f"{candidate_name}_{selected_role}"
+        # Use provided session_key or create one
+        if not session_key:
+            session_key = f"{candidate_name}_{selected_role}"
+        
         if session_key not in session_data:
             return jsonify({'error': 'Resume not found. Please upload resume first.'}), 400
         

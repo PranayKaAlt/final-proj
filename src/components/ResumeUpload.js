@@ -75,7 +75,8 @@ const ResumeUpload = () => {
         selected_role: selectedRole,
         predicted_role: response.data.predicted_role,
         ats_score: response.data.ats_score,
-        skills: response.data.skills
+        skills: response.data.skills,
+        session_key: response.data.session_key
       };
       localStorage.setItem('candidateInfo', JSON.stringify(candidateInfo));
       

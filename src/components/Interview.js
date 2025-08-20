@@ -26,10 +26,11 @@ const Interview = () => {
     
     try {
       setLoading(true);
-      const response = await axios.post(`${apiUrl}/api/interview-questions`, {
-        candidate_name: candidateInfo.candidate_name,
-        selected_role: candidateInfo.selected_role
-      });
+                     const response = await axios.post(`${apiUrl}/api/interview-questions`, {
+                 candidate_name: candidateInfo.candidate_name,
+                 selected_role: candidateInfo.selected_role,
+                 session_key: candidateInfo.session_key
+               });
 
       if (response.data.questions && response.data.questions.length > 0) {
         setQuestions(response.data.questions);
@@ -68,13 +69,14 @@ const Interview = () => {
       const apiUrl = process.env.REACT_APP_API_URL || '';
       
       // Submit answer to AI backend for analysis
-      const response = await axios.post(`${apiUrl}/api/submit-answer`, {
-        candidate_name: candidateInfo.candidate_name,
-        selected_role: candidateInfo.selected_role,
-        question: questions[currentQuestion],
-        answer: answer,
-        question_index: currentQuestion
-      });
+                     const response = await axios.post(`${apiUrl}/api/submit-answer`, {
+                 candidate_name: candidateInfo.candidate_name,
+                 selected_role: candidateInfo.selected_role,
+                 session_key: candidateInfo.session_key,
+                 question: questions[currentQuestion],
+                 answer: answer,
+                 question_index: currentQuestion
+               });
 
       const { score, feedback } = response.data;
       
@@ -108,7 +110,8 @@ const Interview = () => {
     try {
       const response = await axios.post(`${apiUrl}/api/interview-results`, {
         candidate_name: candidateInfo.candidate_name,
-        selected_role: candidateInfo.selected_role
+        selected_role: candidateInfo.selected_role,
+        session_key: candidateInfo.session_key
       });
 
       // Store results in localStorage for the Results component
