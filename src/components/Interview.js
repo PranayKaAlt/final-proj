@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
 import axios from 'axios';
 import './Interview.css';
 
 const Interview = () => {
-  const location = useLocation();
   const navigate = useNavigate();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [questions, setQuestions] = useState([]);
@@ -16,24 +15,13 @@ const Interview = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Get candidate info from location state or localStorage
-  const [candidateInfo, setCandidateInfo] = useState(() => {
+  // Get candidate info from localStorage
+  const [candidateInfo] = useState(() => {
     const saved = localStorage.getItem('candidateInfo');
     return saved ? JSON.parse(saved) : null;
   });
 
-  useEffect(() => {
-    if (!candidateInfo) {
-      setError('No candidate information found. Please upload a resume first.');
-      setLoading(false);
-      return;
-    }
-
-    // Get interview questions from the AI backend
-    loadInterviewQuestions();
-  }, [candidateInfo]);
-
-  const loadInterviewQuestions = async () => {
+  const loadInterviewQuestions = useCallback(async () => {
     const apiUrl = process.env.REACT_APP_API_URL || '';
     
     try {
@@ -55,7 +43,18 @@ const Interview = () => {
       setError(err.response?.data?.error || 'Failed to load interview questions');
       setLoading(false);
     }
-  };
+  }, [candidateInfo]);
+
+  useEffect(() => {
+    if (!candidateInfo) {
+      setError('No candidate information found. Please upload a resume first.');
+      setLoading(false);
+      return;
+    }
+
+    // Get interview questions from the AI backend
+    loadInterviewQuestions();
+  }, [candidateInfo, loadInterviewQuestions]);
 
   const handleAnswerSubmit = async (answer) => {
     if (!answer.trim()) {
@@ -77,7 +76,7 @@ const Interview = () => {
         question_index: currentQuestion
       });
 
-      const { score, feedback, analysis } = response.data;
+      const { score, feedback } = response.data;
       
       // Store the answer and score
       const newAnswers = [...answers, answer];
