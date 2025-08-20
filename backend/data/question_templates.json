@@ -1,0 +1,72 @@
+{
+  "Frontend Developer": [
+    "Tell me about your experience with {skill}.",
+    "How do you approach building responsive UI?",
+    "What challenges have you faced in frontend development?",
+    "How do you ensure cross-browser compatibility?",
+    "Describe a project where you used {skill}."
+  ],
+  "Backend Developer": [
+    "Explain how you use {skill} in backend development.",
+    "How do you design scalable APIs?",
+    "Describe a challenging backend bug you fixed.",
+    "What database technologies have you worked with?",
+    "Tell me about a project where you optimized backend performance."
+  ],
+  "Full Stack Developer": [
+    "How do you balance frontend and backend responsibilities?",
+    "Describe a full stack project where you used {skill}.",
+    "What are the biggest challenges in full stack development?",
+    "How do you keep up with both frontend and backend trends?",
+    "Tell me about integrating {skill} across the stack."
+  ],
+  "Data Scientist": [
+    "How do you approach model evaluation?",
+    "Tell me about a project where you used {skill}.",
+    "How do you clean and prepare data for analysis?",
+    "What tools do you use for data visualization?",
+    "Describe a time you improved a model's accuracy."
+  ],
+  "ML Engineer": [
+    "How do you deploy machine learning models in production?",
+    "Tell me about your experience with {skill} in ML engineering.",
+    "What are the key challenges in ML pipelines?",
+    "How do you monitor model performance post-deployment?",
+    "Describe a project where you automated ML workflows."
+  ],
+  "DevOps Engineer": [
+    "How do you use {skill} in your DevOps workflow?",
+    "Describe your experience with CI/CD pipelines.",
+    "What tools do you use for infrastructure as code?",
+    "How do you handle system monitoring and alerts?",
+    "Tell me about a time you improved deployment reliability."
+  ],
+  "UI/UX Designer": [
+    "How do you incorporate user feedback into your designs?",
+    "Tell me about a project where you used {skill}.",
+    "What tools do you use for prototyping?",
+    "How do you balance aesthetics and usability?",
+    "Describe your process for user research."
+  ],
+  "Android Developer": [
+    "How do you optimize Android apps for performance?",
+    "Tell me about your experience with {skill} in Android development.",
+    "What are the biggest challenges in Android UI design?",
+    "How do you handle app compatibility across devices?",
+    "Describe a project where you used new Android APIs."
+  ],
+  "QA Tester": [
+    "How do you design test cases for new features?",
+    "Tell me about a time you found a critical bug using {skill}.",
+    "What tools do you use for automated testing?",
+    "How do you prioritize test coverage?",
+    "Describe your process for regression testing."
+  ],
+  "Project Manager": [
+    "How do you manage project timelines and deliverables?",
+    "Tell me about a project where you used {skill} to improve outcomes.",
+    "What tools do you use for team collaboration?",
+    "How do you handle project risks and changes?",
+    "Describe your approach to stakeholder communication."
+  ]
+}

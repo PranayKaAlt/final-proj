@@ -33,7 +33,12 @@ session_data = {}
 def load_models():
     """Load the trained AI models"""
     try:
-        model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ai_interviewer_project', 'model')
+        # First try local directory (for Railway deployment)
+        model_path = os.path.join(os.path.dirname(__file__), 'model')
+        if not os.path.exists(model_path):
+            # Fallback to parent directory (for local development)
+            model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ai_interviewer_project', 'model')
+        
         with open(os.path.join(model_path, 'tfidf_vectorizer.pkl'), 'rb') as f:
             vectorizer = pickle.load(f)
         with open(os.path.join(model_path, 'resume_classifier.pkl'), 'rb') as f:
@@ -46,7 +51,12 @@ def load_models():
 def get_roles():
     """Get available job roles from question templates"""
     try:
-        templates_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ai_interviewer_project', 'data', 'question_templates.json')
+        # First try local directory (for Railway deployment)
+        templates_path = os.path.join(os.path.dirname(__file__), 'data', 'question_templates.json')
+        if not os.path.exists(templates_path):
+            # Fallback to parent directory (for local development)
+            templates_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ai_interviewer_project', 'data', 'question_templates.json')
+        
         with open(templates_path) as f:
             templates = json.load(f)
         return list(templates.keys())
@@ -114,7 +124,12 @@ def extract_skills(resume_text, role):
 def generate_questions(resume_text, selected_role):
     """Generate role-specific questions using the actual working logic"""
     try:
-        templates_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ai_interviewer_project', 'data', 'question_templates.json')
+        # First try local directory (for Railway deployment)
+        templates_path = os.path.join(os.path.dirname(__file__), 'data', 'question_templates.json')
+        if not os.path.exists(templates_path):
+            # Fallback to parent directory (for local development)
+            templates_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ai_interviewer_project', 'data', 'question_templates.json')
+        
         with open(templates_path) as f:
             templates = json.load(f)
         
