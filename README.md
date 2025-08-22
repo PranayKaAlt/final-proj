@@ -59,8 +59,8 @@ A modern, full-stack recruitment system that combines React frontend with Python
 
 ### 1. Clone the Repository
 ```bash
-git clone <repository-url>
-cd AI-Powered-Resume-Analyzer-and-Smart-Interviewer
+git clone khud_ki_bana
+cd haha
 ```
 
 ### 2. Setup Backend (Python)
