@@ -13,6 +13,19 @@ from difflib import get_close_matches
 import PyPDF2
 from io import BytesIO
 
+# Import Gemini service
+try:
+    from gemini_service import (
+        analyze_resume_with_gemini,
+        generate_interview_questions_with_gemini,
+        analyze_answer_with_gemini,
+        is_gemini_available
+    )
+    GEMINI_AVAILABLE = is_gemini_available()
+except Exception as e:
+    print(f"Warning: Gemini service not available: {e}")
+    GEMINI_AVAILABLE = False
+
 # Add the parent directory to the path to import modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -290,11 +303,24 @@ def upload_resume():
             X = vectorizer.transform([resume_text])
             predicted_role = model.predict(X)[0]
         
-        # Calculate ATS score using the actual working logic
-        ats_score_value = ats_score(resume_text, selected_role)
+        # Try Gemini for enhanced ATS scoring and analysis
+        gemini_analysis = None
+        if GEMINI_AVAILABLE:
+            try:
+                gemini_analysis = analyze_resume_with_gemini(resume_text, selected_role)
+                if gemini_analysis:
+                    ats_score_value = gemini_analysis['ats_score']
+                    predicted_role = gemini_analysis['predicted_role']
+                    skills = gemini_analysis['skills']
+                    print("✅ Used Gemini for resume analysis")
+            except Exception as e:
+                print(f"Gemini analysis failed, using fallback: {e}")
+                gemini_analysis = None
         
-        # Extract skills using the actual working logic
-        skills = extract_skills(resume_text, selected_role)
+        # Fallback to traditional methods if Gemini unavailable or failed
+        if gemini_analysis is None:
+            ats_score_value = ats_score(resume_text, selected_role)
+            skills = extract_skills(resume_text, selected_role)
         
         # Store data for later use (in production, use a proper database)
         session_key = f"{candidate_name}_{selected_role}"
@@ -304,7 +330,8 @@ def upload_resume():
             'predicted_role': predicted_role,
             'ats_score': ats_score_value,
             'resume_text': resume_text,
-            'skills': skills
+            'skills': skills,
+            'gemini_analysis': gemini_analysis  # Store Gemini analysis if available
         }
         
         # Save session data to file
@@ -347,9 +374,22 @@ def get_interview_questions():
             return jsonify({'error': 'Resume not found. Please upload resume first.'}), 400
         
         resume_text = session_data[session_key]['resume_text']
+        skills = session_data[session_key].get('skills', [])
         
-        # Generate questions using the actual working logic
-        questions = generate_questions(resume_text, selected_role)
+        # Try Gemini for enhanced question generation
+        questions = None
+        if GEMINI_AVAILABLE:
+            try:
+                questions = generate_interview_questions_with_gemini(resume_text, selected_role, skills)
+                if questions:
+                    print("✅ Used Gemini for question generation")
+            except Exception as e:
+                print(f"Gemini question generation failed, using fallback: {e}")
+                questions = None
+        
+        # Fallback to traditional method if Gemini unavailable or failed
+        if not questions:
+            questions = generate_questions(resume_text, selected_role)
         
         return jsonify({
             'questions': questions,
@@ -385,49 +425,118 @@ def submit_answer():
         if session_key not in session_data:
             return jsonify({'error': 'Resume not found. Please upload resume first.'}), 400
         
-        # Analyze answer using the actual working logic
-        score, length_score, relevance_score, clarity_score = analyze_answer(answer, selected_role)
-        score10 = round(score * 10, 2)
+        session_info = session_data[session_key]
         
-        # Generate feedback using the actual working logic
-        feedback = []
-        if length_score < 0.5:
-            feedback.append("Try to give a more detailed answer.")
-        if relevance_score < 0.5:
-            feedback.append("Include more relevant technical keywords.")
-        if clarity_score > 0.7:
-            feedback.append("Answer was confident and clear.")
-        elif clarity_score < 0.3:
-            feedback.append("Try to sound more positive and clear.")
+        # Try Gemini for enhanced answer analysis and feedback
+        gemini_feedback = None
+        if GEMINI_AVAILABLE:
+            try:
+                context = {
+                    'skills': session_info.get('skills', []),
+                    'selected_role': selected_role
+                }
+                gemini_feedback = analyze_answer_with_gemini(question, answer, selected_role, context)
+                if gemini_feedback:
+                    score10 = gemini_feedback['score']
+                    feedback_text = gemini_feedback['feedback']
+                    # Store additional Gemini insights
+                    technical_accuracy = gemini_feedback.get('technical_accuracy', '')
+                    communication_clarity = gemini_feedback.get('communication_clarity', '')
+                    strengths = gemini_feedback.get('strengths', [])
+                    improvements = gemini_feedback.get('improvements', [])
+                    overall_assessment = gemini_feedback.get('overall_assessment', '')
+                    print("✅ Used Gemini for answer analysis")
+            except Exception as e:
+                print(f"Gemini answer analysis failed, using fallback: {e}")
+                gemini_feedback = None
         
-        feedback_text = " ".join(feedback) if feedback else "Good answer!"
+        # Fallback to traditional method if Gemini unavailable or failed
+        if gemini_feedback is None:
+            score, length_score, relevance_score, clarity_score = analyze_answer(answer, selected_role)
+            score10 = round(score * 10, 2)
+            
+            # Generate basic feedback
+            feedback = []
+            if length_score < 0.5:
+                feedback.append("Try to give a more detailed answer.")
+            if relevance_score < 0.5:
+                feedback.append("Include more relevant technical keywords.")
+            if clarity_score > 0.7:
+                feedback.append("Answer was confident and clear.")
+            elif clarity_score < 0.3:
+                feedback.append("Try to sound more positive and clear.")
+            
+            feedback_text = " ".join(feedback) if feedback else "Good answer!"
+            technical_accuracy = ''
+            communication_clarity = ''
+            strengths = []
+            improvements = []
+            overall_assessment = ''
         
         # Store answer in session
         if 'interview_answers' not in session_data[session_key]:
             session_data[session_key]['interview_answers'] = []
         
-        session_data[session_key]['interview_answers'].append({
+        answer_data = {
             'question': question,
             'answer': answer,
             'score': score10,
-            'sentiment': round(clarity_score, 2),
-            'length': round(length_score, 2),
-            'relevance': round(relevance_score, 2),
             'feedback': feedback_text
-        })
+        }
+        
+        # Add Gemini-specific fields if available
+        if gemini_feedback:
+            answer_data.update({
+                'technical_accuracy': technical_accuracy,
+                'communication_clarity': communication_clarity,
+                'strengths': strengths,
+                'improvements': improvements,
+                'overall_assessment': overall_assessment,
+                'analyzed_by': 'gemini'
+            })
+        else:
+            # Add traditional analysis fields
+            answer_data.update({
+                'sentiment': round(clarity_score, 2) if 'clarity_score' in locals() else 0,
+                'length': round(length_score, 2) if 'length_score' in locals() else 0,
+                'relevance': round(relevance_score, 2) if 'relevance_score' in locals() else 0,
+                'analyzed_by': 'traditional'
+            })
+        
+        session_data[session_key]['interview_answers'].append(answer_data)
         
         # Save session data to persist the answers
         save_session_data()
         
-        return jsonify({
+        response_data = {
             'score': score10,
-            'feedback': feedback_text,
-            'analysis': {
-                'length_score': round(length_score, 2),
-                'relevance_score': round(relevance_score, 2),
-                'clarity_score': round(clarity_score, 2)
-            }
-        })
+            'feedback': feedback_text
+        }
+        
+        # Add Gemini-specific fields if available
+        if gemini_feedback:
+            response_data.update({
+                'analysis': {
+                    'technical_accuracy': technical_accuracy,
+                    'communication_clarity': communication_clarity,
+                    'strengths': strengths,
+                    'improvements': improvements,
+                    'overall_assessment': overall_assessment
+                },
+                'analyzed_by': 'gemini'
+            })
+        else:
+            # Add traditional analysis fields
+            response_data.update({
+                'analysis': {
+                    'length_score': round(length_score, 2) if 'length_score' in locals() else 0,
+                    'relevance_score': round(relevance_score, 2) if 'relevance_score' in locals() else 0,
+                    'clarity_score': round(clarity_score, 2) if 'clarity_score' in locals() else 0
+                },
+                'analyzed_by': 'traditional'
+            })
+        
+        return jsonify(response_data)
         
     except Exception as e:
         print(f"Error analyzing answer: {e}")
@@ -491,7 +600,11 @@ def get_interview_results():
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
-    return jsonify({'status': 'healthy', 'message': 'AI Recruitment System API is running'})
+    return jsonify({
+        'status': 'healthy', 
+        'message': 'AI Recruitment System API is running',
+        'gemini_available': GEMINI_AVAILABLE
+    })
 
 @app.route('/api/roles', methods=['GET'])
 def get_roles_endpoint():
@@ -503,4 +616,9 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"Starting AI Recruitment System API...")
     print(f"API will be available at: http://localhost:{port}")
+    if GEMINI_AVAILABLE:
+        print("✅ Gemini 1.5 Flash integration is ENABLED")
+    else:
+        print("⚠️  Gemini integration is DISABLED (GEMINI_API_KEY not found or invalid)")
+        print("   Using fallback traditional methods for analysis")
     app.run(debug=False, host='0.0.0.0', port=port) # Updated for Railway deployment
