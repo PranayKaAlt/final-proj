@@ -1,27 +1,32 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ProgressProvider } from './contexts/ProgressContext';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import ResumeUpload from './components/ResumeUpload';
+import ATSScore from './components/ATSScore';
 import Interview from './components/Interview';
 import Results from './components/Results';
 import './App.css';
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <Navbar />
-        <div className="container">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/upload" element={<ResumeUpload />} />
-            <Route path="/interview" element={<Interview />} />
-            <Route path="/results" element={<Results />} />
-          </Routes>
+    <ProgressProvider>
+      <Router>
+        <div className="App">
+          <Navbar />
+          <div className="container">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/upload" element={<ResumeUpload />} />
+              <Route path="/ats-score" element={<ATSScore />} />
+              <Route path="/interview" element={<Interview />} />
+              <Route path="/results" element={<Results />} />
+            </Routes>
+          </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </ProgressProvider>
   );
 }
 

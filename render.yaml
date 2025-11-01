@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ai-recruitment-backend
+    runtime: python
+    plan: free  # Change to 'starter' or higher for always-on service
+    pythonVersion: "3.11.10"
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 4
+    healthCheckPath: /api/health
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false  # Set this manually in Render dashboard
+

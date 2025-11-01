@@ -2,15 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaDownload, FaUser, FaBriefcase, FaStar } from 'react-icons/fa';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useProgress } from '../contexts/ProgressContext';
 import './Results.css';
 
 const Results = () => {
   const navigate = useNavigate();
+  const { canAccess } = useProgress();
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Check if user can access results
+    if (!canAccess('results')) {
+      // Redirect to appropriate step
+      if (!canAccess('upload')) {
+        navigate('/upload');
+      } else if (!canAccess('ats-score')) {
+        navigate('/ats-score');
+      } else if (!canAccess('interview')) {
+        navigate('/interview');
+      }
+      return;
+    }
+
     // Get results from localStorage (set by Interview component)
     const savedResults = localStorage.getItem('interviewResults');
     if (savedResults) {
@@ -19,8 +34,9 @@ const Results = () => {
     } else {
       setError('No interview results found. Please complete an interview first.');
       setLoading(false);
+      navigate('/interview');
     }
-  }, []);
+  }, [canAccess, navigate]);
 
   const chartData = results ? [
     { name: 'ATS Score', score: results.ats_score },

@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { FaCloudUploadAlt, FaFilePdf, FaUser, FaBriefcase } from 'react-icons/fa';
 import axios from 'axios';
+import { useProgress } from '../contexts/ProgressContext';
+import API_URL from '../config';
 import './ResumeUpload.css';
 
 const ResumeUpload = () => {
   const navigate = useNavigate();
+  const { updateProgress } = useProgress();
   const [file, setFile] = useState(null);
   const [candidateName, setCandidateName] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
@@ -57,11 +60,9 @@ const ResumeUpload = () => {
     formData.append('resume', file);
     formData.append('candidate_name', candidateName);
     formData.append('selected_role', selectedRole);
-
-    const apiUrl = process.env.REACT_APP_API_URL || '';
     
     try {
-      const response = await axios.post(`${apiUrl}/api/upload-resume`, formData, {
+      const response = await axios.post(`${API_URL}/api/upload-resume`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -80,10 +81,18 @@ const ResumeUpload = () => {
       };
       localStorage.setItem('candidateInfo', JSON.stringify(candidateInfo));
       
+      // Mark resume as uploaded using context
+      updateProgress('resumeUploaded', 'true');
+      
       // Clear form
       setFile(null);
       setCandidateName('');
       setSelectedRole('');
+      
+      // Navigate to ATS Score page after successful upload
+      setTimeout(() => {
+        navigate('/ats-score');
+      }, 1000);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to upload resume');
     } finally {
@@ -91,9 +100,6 @@ const ResumeUpload = () => {
     }
   };
 
-  const startInterview = () => {
-    navigate('/interview');
-  };
 
   return (
     <div className="resume-upload">
@@ -182,41 +188,10 @@ const ResumeUpload = () => {
 
         {uploadResult && (
           <div className="upload-result">
-            <h3>AI Analysis Complete!</h3>
-            <div className="result-grid">
-              <div className="result-item">
-                <div className="result-label">Predicted Role</div>
-                <div className="result-value">{uploadResult.predicted_role}</div>
-              </div>
-              <div className="result-item">
-                <div className="result-label">ATS Score</div>
-                <div className="result-value">{uploadResult.ats_score}/100</div>
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill" 
-                    style={{ width: `${uploadResult.ats_score}%` }}
-                  ></div>
-                </div>
-              </div>
-              {uploadResult.skills && uploadResult.skills.length > 0 && (
-                <div className="result-item">
-                  <div className="result-label">Key Skills</div>
-                  <div className="skills-list">
-                    {uploadResult.skills.map((skill, index) => (
-                      <span key={index} className="skill-tag">{skill}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="result-actions">
-              <button 
-                className="btn"
-                onClick={startInterview}
-              >
-                Start AI Interview
-              </button>
-            </div>
+            <h3>✓ Resume Successfully Analyzed!</h3>
+            <p style={{ color: '#666', marginTop: '1rem' }}>
+              Redirecting to your ATS Score...
+            </p>
           </div>
         )}
       </div>

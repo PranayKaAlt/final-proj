@@ -53,6 +53,23 @@
   transform: translateY(-2px);
 }
 
+.nav-link.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.nav-link.disabled:hover {
+  background: transparent;
+  transform: none;
+}
+
+.lock-icon {
+  margin-left: 6px;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
 .nav-icon {
   margin-right: 8px;
   font-size: 1.1rem;

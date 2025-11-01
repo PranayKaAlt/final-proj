@@ -1,17 +1,35 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaUpload, FaComments, FaChartBar } from 'react-icons/fa';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { FaHome, FaUpload, FaChartLine, FaComments, FaChartBar, FaLock } from 'react-icons/fa';
+import { useProgress } from '../contexts/ProgressContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { canAccess } = useProgress();
 
   const navItems = [
-    { path: '/', label: 'Home', icon: <FaHome /> },
-    { path: '/upload', label: 'Upload Resume', icon: <FaUpload /> },
-    { path: '/interview', label: 'Interview', icon: <FaComments /> },
-    { path: '/results', label: 'Results', icon: <FaChartBar /> }
+    { path: '/', label: 'Home', icon: <FaHome />, step: null },
+    { path: '/upload', label: 'Upload Resume', icon: <FaUpload />, step: 'upload' },
+    { path: '/ats-score', label: 'ATS Score', icon: <FaChartLine />, step: 'ats-score' },
+    { path: '/interview', label: 'Interview', icon: <FaComments />, step: 'interview' },
+    { path: '/results', label: 'Results', icon: <FaChartBar />, step: 'results' }
   ];
+
+  const handleNavClick = (e, item) => {
+    if (item.step && !canAccess(item.step)) {
+      e.preventDefault();
+      // Show a message or navigate to the appropriate step
+      if (!canAccess('upload')) {
+        navigate('/upload');
+      } else if (item.step === 'interview' && !canAccess('ats-score')) {
+        navigate('/ats-score');
+      } else if (item.step === 'results' && !canAccess('interview')) {
+        navigate('/interview');
+      }
+    }
+  };
 
   return (
     <nav className="navbar">
@@ -20,17 +38,34 @@ const Navbar = () => {
           AI Recruitment System
         </Link>
         <ul className="nav-menu">
-          {navItems.map((item) => (
-            <li key={item.path} className="nav-item">
-              <Link
-                to={item.path}
-                className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                {item.label}
-              </Link>
-            </li>
-          ))}
+          {navItems.map((item) => {
+            const isDisabled = item.step && !canAccess(item.step);
+            const isActive = location.pathname === item.path;
+            
+            return (
+              <li key={item.path} className="nav-item">
+                {isDisabled ? (
+                  <span
+                    className={`nav-link disabled ${isActive ? 'active' : ''}`}
+                    title="Complete previous steps to unlock"
+                  >
+                    <span className="nav-icon">{item.icon}</span>
+                    {item.label}
+                    <FaLock className="lock-icon" />
+                  </span>
+                ) : (
+                  <Link
+                    to={item.path}
+                    className={`nav-link ${isActive ? 'active' : ''}`}
+                    onClick={(e) => handleNavClick(e, item)}
+                  >
+                    <span className="nav-icon">{item.icon}</span>
+                    {item.label}
+                  </Link>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </nav>
