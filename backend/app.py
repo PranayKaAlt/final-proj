@@ -597,6 +597,15 @@ def get_interview_results():
         print(f"Error getting results: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/ping', methods=['GET'])
+def ping():
+    """Simple ping endpoint for connectivity testing"""
+    return jsonify({
+        'status': 'ok',
+        'message': 'pong',
+        'timestamp': pd.Timestamp.now().isoformat()
+    })
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
