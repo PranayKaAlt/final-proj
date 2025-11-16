@@ -13,6 +13,17 @@ from difflib import get_close_matches
 import PyPDF2
 from io import BytesIO
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    # Try loading from backend directory first, then parent directory
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(backend_dir)
+    load_dotenv(os.path.join(backend_dir, '.env'))  # Try backend/.env
+    load_dotenv(os.path.join(parent_dir, '.env'))   # Try root/.env
+except ImportError:
+    pass  # python-dotenv not installed, use environment variables directly
+
 # Import Gemini service
 try:
     from gemini_service import (
@@ -625,9 +636,20 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"Starting AI Recruitment System API...")
     print(f"API will be available at: http://localhost:{port}")
+    
+    # Debug: Check environment variable directly
+    api_key_from_env = os.getenv('GEMINI_API_KEY')
+    if api_key_from_env:
+        print(f"✅ GEMINI_API_KEY found in environment (length: {len(api_key_from_env)} characters)")
+    else:
+        print("⚠️  GEMINI_API_KEY not found in os.getenv()")
+        print(f"   Current working directory: {os.getcwd()}")
+        print(f"   Backend directory: {os.path.dirname(os.path.abspath(__file__))}")
+    
     if GEMINI_AVAILABLE:
         print("✅ Gemini 1.5 Flash integration is ENABLED")
     else:
         print("⚠️  Gemini integration is DISABLED (GEMINI_API_KEY not found or invalid)")
         print("   Using fallback traditional methods for analysis")
+        print("   Tip: Make sure GEMINI_API_KEY is set in your environment or .env file")
     app.run(debug=False, host='0.0.0.0', port=port) # Updated for Railway deployment

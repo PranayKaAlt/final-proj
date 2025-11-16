@@ -9,14 +9,47 @@ from typing import List, Dict, Optional, Tuple
 # Try to load from .env file if python-dotenv is available (for local development)
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+    # Try loading from multiple locations
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(backend_dir)
+    current_dir = os.getcwd()
+    
+    # Try loading from different locations (in order of preference)
+    env_paths = [
+        os.path.join(backend_dir, '.env'),      # backend/.env
+        os.path.join(parent_dir, '.env'),       # root/.env
+        os.path.join(current_dir, '.env'),      # current directory/.env
+        '.env'                                   # relative path
+    ]
+    
+    # Try loading from each path (load_dotenv will skip if file doesn't exist)
+    loaded_any = False
+    for env_path in env_paths:
+        if os.path.exists(env_path):
+            result = load_dotenv(env_path, override=True)  # Use override=True to ensure it loads
+            if result:
+                print(f"✅ Loaded .env from: {env_path}")
+                loaded_any = True
+    
+    # Also try default load_dotenv() which searches current directory and parents
+    if not loaded_any:
+        result = load_dotenv(override=True)
+        if result:
+            print("✅ Loaded .env using default search")
 except ImportError:
-    pass  # python-dotenv not installed, use environment variables directly
+    print("⚠️  python-dotenv not installed - install it with: pip install python-dotenv")
+except Exception as e:
+    print(f"⚠️  Error loading .env file: {e}")
 
 # Configure Gemini API
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
+    print(f"✅ Gemini API key configured (length: {len(GEMINI_API_KEY)} characters)")
+else:
+    print("⚠️  GEMINI_API_KEY not found in environment")
+    print("   Please set GEMINI_API_KEY in your .env file or environment variables")
 
 # Use Gemini 1.5 Flash model
 MODEL_NAME = 'gemini-2.5-flash-lite'
