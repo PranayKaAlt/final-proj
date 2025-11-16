@@ -59,34 +59,47 @@ import json
 import hashlib
 import time
 
+# Get cross-platform session data file path
+def get_session_data_path():
+    """Get the path to session data file (cross-platform)"""
+    # Use backend directory for session storage (works on all platforms)
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    session_file = os.path.join(backend_dir, 'session_data.json')
+    return session_file
+
 def create_session_key(candidate_name, selected_role):
     """Create a unique session key"""
     key_string = f"{candidate_name}_{selected_role}_{int(time.time())}"
     return hashlib.md5(key_string.encode()).hexdigest()[:8]
 
 def save_session_data():
-    """Save session data to a temporary file with timestamp"""
+    """Save session data to a file with timestamp (cross-platform)"""
     try:
         session_data_with_timestamp = {
             'data': session_data,
             'timestamp': time.time()
         }
-        with open('/tmp/session_data.json', 'w') as f:
+        session_file = get_session_data_path()
+        with open(session_file, 'w') as f:
             json.dump(session_data_with_timestamp, f)
     except Exception as e:
         print(f"Error saving session data: {e}")
 
 def load_session_data():
-    """Load session data from temporary file"""
+    """Load session data from file (cross-platform)"""
     global session_data
     try:
-        with open('/tmp/session_data.json', 'r') as f:
-            session_data_with_timestamp = json.load(f)
-            # Check if session is not too old (1 hour)
-            if time.time() - session_data_with_timestamp.get('timestamp', 0) < 3600:
-                session_data = session_data_with_timestamp.get('data', {})
-            else:
-                session_data = {}
+        session_file = get_session_data_path()
+        if os.path.exists(session_file):
+            with open(session_file, 'r') as f:
+                session_data_with_timestamp = json.load(f)
+                # Check if session is not too old (1 hour)
+                if time.time() - session_data_with_timestamp.get('timestamp', 0) < 3600:
+                    session_data = session_data_with_timestamp.get('data', {})
+                else:
+                    session_data = {}
+        else:
+            session_data = {}
     except Exception as e:
         print(f"Error loading session data: {e}")
         session_data = {}
