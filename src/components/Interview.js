@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
 import axios from 'axios';
@@ -8,7 +8,7 @@ import './Interview.css';
 
 const Interview = () => {
   const navigate = useNavigate();
-  const { canAccess, updateProgress } = useProgress();
+  const { canAccess, updateProgress, resetProgress } = useProgress();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState([]);
@@ -19,6 +19,10 @@ const Interview = () => {
   const [error, setError] = useState('');
   const [validationError, setValidationError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recentReview, setRecentReview] = useState(null);
+  const [voiceError, setVoiceError] = useState('');
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const recognitionRef = useRef(null);
   
   // Get candidate info from localStorage
   const [candidateInfo] = useState(() => {
@@ -80,6 +84,69 @@ const Interview = () => {
     setValidationError('');
   }, [currentQuestion]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setSpeechSupported(false);
+      setVoiceError('Voice input is not supported in this browser.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setVoiceError('');
+      setIsRecording(true);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript =
+        event.results[event.results.length - 1][0]?.transcript?.trim();
+
+      if (!transcript) return;
+
+      const answerInput = document.getElementById('answerInput');
+      if (answerInput) {
+        const currentValue = answerInput.value?.trim();
+        answerInput.value = currentValue
+          ? `${currentValue} ${transcript}`
+          : transcript;
+        answerInput.focus();
+        const end = answerInput.value.length;
+        answerInput.setSelectionRange(end, end);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      let message = 'Voice input error. Please try again.';
+      if (event.error === 'not-allowed') {
+        message = 'Microphone access was denied.';
+      } else if (event.error === 'no-speech') {
+        message = 'No speech detected. Please speak clearly.';
+      }
+      setVoiceError(message);
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+    setSpeechSupported(true);
+
+    return () => {
+      recognition.stop();
+    };
+  }, []);
+
   const handleAnswerSubmit = async (answer) => {
     // Clear any previous validation errors
     setValidationError('');
@@ -124,8 +191,12 @@ const Interview = () => {
         answerInput.value = '';
       }
       
-      // Show feedback
-      alert(`Score: ${score}/10\nFeedback: ${feedback}`);
+      // Show feedback inline below the question
+      setRecentReview({
+        question: questions[currentQuestion],
+        score,
+        feedback
+      });
       
       // Clear validation error on success
       setValidationError('');
@@ -160,8 +231,8 @@ const Interview = () => {
       localStorage.setItem('interviewResults', JSON.stringify(response.data));
       
       // Mark interview as completed
-      updateProgress('interviewCompleted', 'true');
-      updateProgress('resultsAvailable', 'true');
+      updateProgress('interviewCompleted', true);
+      updateProgress('resultsAvailable', true);
     } catch (err) {
       console.error('Error getting final results:', err);
       setError('Failed to get final results');
@@ -169,8 +240,20 @@ const Interview = () => {
   };
 
   const toggleRecording = () => {
-    setIsRecording(!isRecording);
-    // In a real app, this would handle actual voice recording
+    if (!speechSupported || !recognitionRef.current) {
+      setVoiceError('Voice input is not supported in this browser.');
+      return;
+    }
+
+    if (isRecording) {
+      recognitionRef.current.stop();
+    } else {
+      try {
+        recognitionRef.current.start();
+      } catch (err) {
+        setVoiceError('Unable to access the microphone. Please try again.');
+      }
+    }
   };
 
   const getOverallScore = () => {
@@ -212,7 +295,7 @@ const Interview = () => {
         <div className="results-container">
           <div className="overall-score">
             <h2>Overall Score</h2>
-            <div className="score-display">{getOverallScore()}/100</div>
+            <div className="score-display">{getOverallScore()}/10</div>
             <p>Your interview has been completed and analyzed by AI!</p>
           </div>
           
@@ -239,11 +322,13 @@ const Interview = () => {
             <button className="btn" onClick={() => navigate('/results')}>
               View Detailed Results
             </button>
-            <button className="btn secondary" onClick={() => {
-              // Reset progress and navigate to upload
-              localStorage.clear();
-              window.location.href = '/upload';
-            }}>
+            <button
+              className="btn secondary"
+              onClick={() => {
+                resetProgress();
+                window.location.href = '/upload';
+              }}
+            >
               Start New Session
             </button>
           </div>
@@ -295,10 +380,14 @@ const Interview = () => {
               <button 
                 className={`btn record-btn ${isRecording ? 'recording' : ''}`}
                 onClick={toggleRecording}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !speechSupported}
               >
                 {isRecording ? <FaMicrophoneSlash /> : <FaMicrophone />}
-                {isRecording ? 'Stop Recording' : 'Voice Input'}
+                {speechSupported
+                  ? isRecording
+                    ? 'Stop Recording'
+                    : 'Voice Input'
+                  : 'Voice Input Unavailable'}
               </button>
               
               <button 
@@ -312,7 +401,23 @@ const Interview = () => {
                 {isSubmitting ? 'Submitting...' : 'Submit Answer'}
               </button>
             </div>
+
+            {!speechSupported && (
+              <p className="voice-hint">
+                Voice input isn&apos;t available in this browser. Try Chrome or Edge.
+              </p>
+            )}
+            {voiceError && <p className="voice-error">{voiceError}</p>}
           </div>
+
+          {recentReview && (
+            <div className="answer-review">
+              <div className="review-chip">Latest Feedback</div>
+              <p className="review-question">{recentReview.question}</p>
+              <div className="review-score">Score: {recentReview.score}/10</div>
+              <p className="review-text">{recentReview.feedback}</p>
+            </div>
+          )}
         </div>
 
         <div className="interview-tips">

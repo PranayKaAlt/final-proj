@@ -7,7 +7,7 @@ import './Navbar.css';
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { canAccess } = useProgress();
+  const { progress, canAccess } = useProgress();
 
   const navItems = [
     { path: '/', label: 'Home', icon: <FaHome />, step: null },
@@ -18,14 +18,17 @@ const Navbar = () => {
   ];
 
   const handleNavClick = (e, item) => {
-    if (item.step && !canAccess(item.step)) {
+    if (!item.step) return;
+
+    if (!canAccess(item.step)) {
       e.preventDefault();
-      // Show a message or navigate to the appropriate step
-      if (!canAccess('upload')) {
+
+      // Guide user to the correct previous step in order
+      if (!progress.resumeUploaded) {
         navigate('/upload');
-      } else if (item.step === 'interview' && !canAccess('ats-score')) {
+      } else if (!progress.atsScoreViewed) {
         navigate('/ats-score');
-      } else if (item.step === 'results' && !canAccess('interview')) {
+      } else if (!progress.interviewCompleted) {
         navigate('/interview');
       }
     }
@@ -35,7 +38,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="nav-container">
         <Link to="/" className="nav-logo">
-          AI Recruitment System
+          RecruifyAi
         </Link>
         <ul className="nav-menu">
           {navItems.map((item) => {

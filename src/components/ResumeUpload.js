@@ -82,7 +82,7 @@ const ResumeUpload = () => {
       localStorage.setItem('candidateInfo', JSON.stringify(candidateInfo));
       
       // Mark resume as uploaded using context
-      updateProgress('resumeUploaded', 'true');
+      updateProgress('resumeUploaded', true);
       
       // Clear form
       setFile(null);

@@ -1,5 +1,14 @@
 .App {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
+  color: #fff;
+}
+
+.main-content {
+  flex: 1 0 auto;
+  width: 100%;
 }
 
 .page-title {
@@ -7,7 +16,7 @@
   font-weight: 700;
   color: white;
   text-align: center;
-  margin: 40px 0;
+  margin: 20px 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -29,11 +38,12 @@
 }
 
 .feature-card {
-  background: white;
+  background: #dfe3ea;
   border-radius: 15px;
   padding: 30px;
   text-align: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(20, 30, 40, 0.1);
   transition: transform 0.3s ease;
 }
 
@@ -44,21 +54,18 @@
 .feature-icon {
   font-size: 3rem;
   margin-bottom: 20px;
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #0d1117;
 }
 
 .feature-title {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 15px;
-  color: #333;
+  color: #1f2a37;
 }
 
 .feature-description {
-  color: #666;
+  color: #4b5563;
   line-height: 1.6;
 }
 
@@ -68,20 +75,22 @@
 }
 
 .cta-button {
-  background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-  color: white;
-  border: none;
+  background: var(--accent);
+  color: #052238;
+  border: 3px solid #0b2e4a;
   padding: 15px 40px;
   border-radius: 30px;
   font-size: 1.2rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   text-decoration: none;
   display: inline-block;
+  box-shadow: 0.25em 0.25em 0 #031a2d;
 }
 
 .cta-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0.35em 0.35em 0 #031a2d;
+  background: var(--accent-strong);
 } 

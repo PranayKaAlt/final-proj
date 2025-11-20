@@ -23,7 +23,7 @@ const ATSScore = () => {
       setCandidateInfo(JSON.parse(saved));
       setLoading(false);
       // Mark ATS score as viewed
-      updateProgress('atsScoreViewed', 'true');
+      updateProgress('atsScoreViewed', true);
     } else {
       // No resume uploaded, redirect to upload
       navigate('/upload');

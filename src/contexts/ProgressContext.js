@@ -34,11 +34,18 @@ export const ProgressProvider = ({ children }) => {
   }, []);
 
   const updateProgress = (key, value) => {
+    // Keep React state in sync
     setProgress(prev => ({
       ...prev,
       [key]: value
     }));
-    localStorage.setItem(key, value);
+
+    // Persist to localStorage using string values
+    if (typeof value === 'boolean') {
+      localStorage.setItem(key, value ? 'true' : 'false');
+    } else {
+      localStorage.setItem(key, value);
+    }
   };
 
   const resetProgress = () => {

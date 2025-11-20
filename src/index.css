@@ -4,89 +4,143 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg-primary: #030303;
+  --bg-secondary: linear-gradient(to bottom, #0b0b2b, #1b2735 70%, #090a0f);
+  --card-bg: rgba(10, 10, 18, 0.92);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 25px 70px rgba(0, 0, 0, 0.8);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.75);
+  --accent: #87cefa;
+  --accent-strong: #00bfff;
+  --accent-muted: rgba(135, 206, 250, 0.25);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+  --glass-bg: rgba(15, 15, 25, 0.65);
+  --radius-xl: 24px;
+  --radius-lg: 18px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  background: var(--bg-secondary);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+#root,
+.App {
+  background: transparent;
   min-height: 100vh;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 24px 20px 24px;
 }
 
 .card {
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  padding: 30px;
-  margin: 20px 0;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  border: var(--glass-border);
+  padding: 32px;
+  margin: 24px 0;
+  box-shadow: var(--card-shadow);
 }
 
 .btn {
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 25px;
+  background: var(--accent);
+  color: #052238;
+  border: 3px solid #0b2e4a;
+  padding: 0.8rem 1.6rem;
+  border-radius: 999px;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  font-size: 1rem;
+  font-weight: 800;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-shadow: 0.2em 0.2em 0 #031a2d;
 }
 
 .btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0.3em 0.3em 0 #031a2d;
+  background: var(--accent-strong);
 }
 
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+  box-shadow: 0.1em 0.1em 0 #031a2d;
 }
 
 .input-field {
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e1e5e9;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 0.3s ease;
+  padding: 14px 18px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-primary);
+  transition: border-color 0.3s ease, background 0.3s ease;
 }
 
 .input-field:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+select.input-field {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 3rem;
+  background-color: rgba(9, 9, 15, 0.9);
+  border-color: rgba(135, 206, 250, 0.5);
+  position: relative;
+  background-image: linear-gradient(45deg, transparent 50%, #87cefa 50%),
+    linear-gradient(135deg, #87cefa 50%, transparent 50%);
+  background-position: calc(100% - 20px) calc(50% - 3px), calc(100% - 15px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+select.input-field option {
+  background-color: #0f0f18;
+  color: var(--text-primary);
 }
 
 .progress-bar {
   width: 100%;
-  height: 20px;
-  background-color: #e1e5e9;
-  border-radius: 10px;
+  height: 18px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: linear-gradient(120deg, #87cefa, #00bfff);
   transition: width 0.3s ease;
+  border-radius: inherit;
 }
 
 .grid {
   display: grid;
-  gap: 20px;
+  gap: 24px;
 }
 
 .grid-2 {
@@ -107,4 +161,85 @@ code {
 
 .mt-20 {
   margin-top: 20px;
-} 
+}
+
+button,
+.cta-button {
+  background: var(--accent);
+  font-family: inherit;
+  padding: 0.7em 1.5em;
+  font-weight: 900;
+  font-size: 1rem;
+  border: 3px solid #0b2e4a;
+  border-radius: 0.4em;
+  box-shadow: 0.15em 0.15em 0 #031a2d;
+  cursor: pointer;
+  color: #052238;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+}
+
+button:hover,
+.cta-button:hover {
+  transform: translate(-0.05em, -0.05em);
+  box-shadow: 0.2em 0.2em 0 #031a2d;
+  background: var(--accent-strong);
+}
+
+button:active,
+.cta-button:active {
+  transform: translate(0.05em, 0.05em);
+  box-shadow: 0.08em 0.08em 0 #031a2d;
+}
+
+.page-title {
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 720px;
+  margin-bottom: 2.5rem;
+}
+
+.glass-panel {
+  background: var(--glass-bg);
+  border-radius: var(--radius-xl);
+  border: var(--glass-border);
+  padding: 32px;
+  box-shadow: var(--card-shadow);
+}
+
+.accent-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--accent-muted);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+
+.divider {
+  height: 1px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 32px 0;
+}
